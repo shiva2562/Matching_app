@@ -2,6 +2,7 @@ package com.example.lab.stablematching;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,28 +13,36 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+
 public class MainActivity extends AppCompatActivity {
     private EditText name;
     private EditText password;
     private Button login;
     private Button signup;
-
+    private FirebaseAuth mAuth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        mAuth = FirebaseAuth.getInstance();
         name=(EditText)findViewById(R.id.username);
         password=(EditText)findViewById(R.id.password);
         login=(Button)findViewById(R.id.login);
         signup=(Button)findViewById(R.id.signup);
+        if(mAuth.getCurrentUser()!=null){
+
+        }
 
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                validate(name.getText().toString(),password.getText().toString());
+                validate();
             }
         });
         signup.setOnClickListener(new View.OnClickListener() {
@@ -43,19 +52,25 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent1);
             }
         });
+
     }
 
-    private void validate(String user,String pass){
-        if(arrayofstrings.usernames.contains(user) && arrayofstrings.passwords.contains(pass) && arrayofstrings.usernames.indexOf(user)==arrayofstrings.passwords.indexOf(pass)){
-            arrayofstrings.current_user=user;
-            Intent intent=new Intent(MainActivity.this,SecondActivity.class);
-            startActivity(intent);
-        }
-        else if(arrayofstrings.usernamesta.contains(user) && arrayofstrings.passwordsta.contains(pass) && arrayofstrings.usernamesta.indexOf(user)==arrayofstrings.passwordsta.indexOf(pass)){
-            arrayofstrings.current_user=user;
-            Intent intent=new Intent(MainActivity.this,ThirdActivity.class);
-            startActivity(intent);
-        }
+    private void validate(){
+        String Name=name.getText().toString();
+        String Password=password.getText().toString();
+        mAuth.signInWithEmailAndPassword(Name,Password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if(task.isSuccessful()){
+                    Intent intent =new Intent(MainActivity.this,SecondActivity.class);
+                    startActivity(intent);
+                }
+                else{
+                    Intent intent =new Intent(MainActivity.this,ThirdActivity.class);
+                    startActivity(intent);
+                }
+            }
+        });
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

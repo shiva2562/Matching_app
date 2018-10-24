@@ -2,10 +2,12 @@ package com.example.lab.stablematching;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,8 +25,10 @@ public class SecondActivity extends AppCompatActivity implements AdapterView.OnI
 
         final Button userspr;
         final Button leave;
+        final LinearLayout profs;
         userspr = (Button) findViewById(R.id.joinp);
         leave = (Button) findViewById(R.id.leavep);
+        profs = (LinearLayout) findViewById(R.id.vertical1);
         if(arrayofstrings.userspr.contains(arrayofstrings.current_user)) {
             userspr.setEnabled(false);
             leave.setEnabled(true);
