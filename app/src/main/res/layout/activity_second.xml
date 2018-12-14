@@ -323,12 +323,12 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/textView12"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/textView12"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="4"
@@ -337,7 +337,6 @@
                     android:textAlignment="center" />
 
                 <TextView
-                    android:id="@+id/ran6"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_gravity="end"
@@ -346,7 +345,6 @@
                     android:textAlignment="textEnd" />
 
                 <Spinner
-                    android:id="@+id/spinner6"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1" />

@@ -1,8 +1,10 @@
 package com.example.lab.stablematching;
 
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -12,12 +14,22 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class SecondActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
-
+    private FirebaseFirestore db=FirebaseFirestore.getInstance();
+    private CollectionReference soref =db.collection("user-data");
+    private String cuser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,15 +40,33 @@ public class SecondActivity extends AppCompatActivity implements AdapterView.OnI
         final LinearLayout profs;
         userspr = (Button) findViewById(R.id.joinp);
         leave = (Button) findViewById(R.id.leavep);
+        cuser=FirebaseAuth.getInstance().getCurrentUser().getUid();
+        soref.document(cuser).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if(documentSnapshot.exists()){
+                    boolean tab = documentSnapshot.getBoolean("table");
+                    if(tab){
+                        userspr.setEnabled(false);
+                        leave.setEnabled(true);
+                    }
+                    else{
+                        userspr.setEnabled(true);
+                        leave.setEnabled(false);
+                    }
+                }
+                else{
+                    Toast.makeText(SecondActivity.this, "no such thing exists", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(SecondActivity.this, "sorry! can't join the table", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         profs = (LinearLayout) findViewById(R.id.vertical1);
-        if(arrayofstrings.userspr.contains(arrayofstrings.current_user)) {
-            userspr.setEnabled(false);
-            leave.setEnabled(true);
-        }
-        else{
-            userspr.setEnabled(true);
-            leave.setEnabled(false);
-        }
         Spinner spinner = findViewById(R.id.spinner1);
         Spinner spinner4 = findViewById(R.id.spinner2);
         Spinner spinner5 = findViewById(R.id.spinner3);
@@ -56,7 +86,18 @@ public class SecondActivity extends AppCompatActivity implements AdapterView.OnI
         userspr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                arrayofstrings.userspr.add(arrayofstrings.current_user);
+                soref.document("table").update("profs",FieldValue.arrayUnion(cuser));
+                soref.document(cuser).update("table",true);
+                soref.document("table").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                       List<String> tas= (List<String>) documentSnapshot.get("tas");
+                       for (String ta:tas){
+                           soref.document(cuser).update("plist",FieldValue.arrayUnion(ta));
+                           soref.document(ta).update("plist",FieldValue.arrayUnion(cuser));
+                       }
+                    }
+                });
                 userspr.setEnabled(false);
                 leave.setEnabled(true);
             }
@@ -64,7 +105,18 @@ public class SecondActivity extends AppCompatActivity implements AdapterView.OnI
         leave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                arrayofstrings.userspr.remove(arrayofstrings.current_user);
+                soref.document("table").update("profs",FieldValue.arrayRemove(cuser));
+                soref.document(cuser).update("table",false);
+                soref.document("table").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        List<String> tas= (List<String>) documentSnapshot.get("tas");
+                        for (String ta:tas){
+                            soref.document(cuser).update("plist",FieldValue.arrayRemove(ta));
+                            soref.document(ta).update("plist",FieldValue.arrayRemove(cuser));
+                        }
+                    }
+                });
                 userspr.setEnabled(true);
                 leave.setEnabled(false);
 
